@@ -1,0 +1,40 @@
+import sqlite3
+
+def get_more_information(bot, call, filial, cours):
+    conn = sqlite3.connect('mydatabase.db')
+    cur = conn.cursor()
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                          text="О ЧЕМ КУРС:", reply_markup=None)
+    cur.execute(("select description from courses where name=? and filial=?"), (cours, filial))
+    rows = cur.fetchall()
+    if (rows == []):
+        #pass
+        bot.send_message(call.message.chat.id, "Описания нет")
+    else:
+        bot.send_message(call.message.chat.id, rows[0][0])
+    #print(rows[0][0])
+
+    conn.close()
+#get_more_information("Технопарк (Нарвская)", "Программирование на Python(5-8 класс)")
+
+def get_schedule(bot, call, filial, cours):
+#def get_schedule( filial, cours):
+    conn = sqlite3.connect('mydatabase.db')
+    cur = conn.cursor()
+    bot.edit_message_text(chat_id=call.message.chat.id, message_id=call.message.message_id,
+                          text="РАСПИСАНИЕ:", reply_markup=None)
+    cur.execute(("select schedule.day_of_week, schedule.time from schedule " 
+                "inner join courses on "
+                "schedule.id_schedule = courses.id_courses "
+                "where courses.name=? and courses.filial=?"), (cours, filial))
+    rows = cur.fetchall()
+    if (rows == []):
+        #pass
+        bot.send_message(call.message.chat.id, "Занятий нет")
+    else:
+        for row in rows:
+            #print(row[0], row[1])
+            bot.send_message(call.message.chat.id, row[0] + '\n' + row[1])
+    #print(rows)
+    conn.close()
+#get_schedule("Технопарк (Нарвская)", "Программирование на Python(5-8 класс)")
